@@ -209,3 +209,23 @@ none
 
 #### See also
 [`tmr.obj:register()`](#tmrobjregister)
+
+## tmr.now()
+Returns the system counter, which counts in microseconds. Limited to 31 bits, after that it wraps around back to zero.
+
+#### Parameters
+none
+
+#### Returns
+the current value of the system counter
+
+## tmr.time()
+Returns the system uptime, in seconds. Limited to 31 bits, after that it wraps around back to zero.
+
+#### Parameters
+none
+
+#### Returns
+the system uptime, in seconds, possibly wrapped around
+
+

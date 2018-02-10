@@ -2,6 +2,7 @@
 #include "module.h"
 #include "lauxlib.h"
 #include <stdint.h>
+#include <os.h>
 #include "task/task.h"
 
 #include "freertos/FreeRTOS.h"
@@ -232,6 +233,26 @@ static int tmr_create( lua_State *L ) {
   return 1;
 }
 
+// Lua: tmr.now()
+static int tmr_now( lua_State *L ) {
+  struct os_time ot;
+  os_get_time(&ot);
+  lua_pushinteger(L,(unsigned int)ot.usec + (unsigned int)1000000L*ot.sec);
+  return 1;
+}
+
+// Lua: tmr.time()
+static int tmr_time( lua_State *L ) {
+  /*
+  time_t t = time(NULL);
+  lua_pushinteger(L, t);
+  */
+  struct os_time ot;
+  os_get_time(&ot);
+  lua_pushinteger(L,(unsigned int)ot.sec);
+  return 1;
+}
+
 
 // Module function map
 
@@ -250,6 +271,8 @@ static const LUA_REG_TYPE tmr_dyn_map[] = {
 
 static const LUA_REG_TYPE tmr_map[] = {
   { LSTRKEY( "create" ),       LFUNCVAL( tmr_create ) },
+  { LSTRKEY( "now" ),       LFUNCVAL( tmr_now ) },
+  { LSTRKEY( "time" ),       LFUNCVAL( tmr_time ) },
   { LSTRKEY( "ALARM_SINGLE" ), LNUMVAL( TIMER_MODE_SINGLE ) },
   { LSTRKEY( "ALARM_SEMI" ),   LNUMVAL( TIMER_MODE_SEMI ) },
   { LSTRKEY( "ALARM_AUTO" ),   LNUMVAL( TIMER_MODE_AUTO ) },

@@ -21,6 +21,12 @@ Initialize single pin to GPIO mode, set the pin in/out direction, and optional i
 ```lua
 gpio.mode(gpio,mode [, pullup])
 ```
+
+#### Parameters
+- `pin` pin to configure, IO index
+- `mode` one of gpio.OUTPUT, gpio.OPENDRAIN, gpio.INPUT, or gpio.INT (interrupt mode)
+- `pullup` gpio.PULLUP enables the weak pull-up resistor; default is gpio.FLOAT
+
 #### Returns
 `nil`
 

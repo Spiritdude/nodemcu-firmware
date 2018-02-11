@@ -203,6 +203,27 @@ static int lgpio_write (lua_State *L)
 }
 
 
+// Lua: gpio.mode(gpio, mode, pullup)
+static int lgpio_mode (lua_State *L)
+{
+  int gpio = luaL_checkint (L, 1);
+  int mode = luaL_checkint (L, 2);
+  gpio_config_t cfg;
+  
+  cfg.pin_bit_mask = 0;
+  cfg.pin_bit_mask = 1ULL << gpio;
+  
+  cfg.intr_type = GPIO_INTR_DISABLE;
+  cfg.mode = mode;
+  /* TODO
+  if(mode & OPENDRAIN)
+    cfg.mode |= GPIO_MODE_DEF_OD;
+  if(pullup) 
+    cfg.mode |= GPIO_MODE_PULL_UP;
+  */
+  check_err (L, gpio_config (&cfg));
+  return 0;
+}
 
 static void nodemcu_gpio_callback_task (task_param_t param, task_prio_t prio)
 {
@@ -239,7 +260,6 @@ static const LUA_REG_TYPE lgpio_map[] =
   { LSTRKEY( "wakeup" ),            LFUNCVAL( lgpio_wakeup )          },
   { LSTRKEY( "write"  ),            LFUNCVAL( lgpio_write )           },
 
-
   { LSTRKEY( "OUT" ),               LNUMVAL( GPIO_MODE_OUTPUT )       },
   { LSTRKEY( "IN" ),                LNUMVAL( GPIO_MODE_INPUT )        },
   { LSTRKEY( "IN_OUT" ),            LNUMVAL( GPIO_MODE_INPUT_OUTPUT ) },
@@ -255,6 +275,17 @@ static const LUA_REG_TYPE lgpio_map[] =
   { LSTRKEY( "INTR_UP_DOWN" ),      LNUMVAL( GPIO_INTR_ANYEDGE )      },
   { LSTRKEY( "INTR_LOW" ),          LNUMVAL( GPIO_INTR_LOW_LEVEL )    },
   { LSTRKEY( "INTR_HIGH" ),         LNUMVAL( GPIO_INTR_HIGH_LEVEL )   },
+
+  // NodeMCU/ESP8266 compatibility
+  { LSTRKEY( "mode" ),              LFUNCVAL( lgpio_mode )            },
+  { LSTRKEY( "OUTPUT" ),            LNUMVAL( GPIO_MODE_OUTPUT )       },
+  { LSTRKEY( "INPUT" ),             LNUMVAL( GPIO_MODE_INPUT )        },
+  { LSTRKEY( "PULLUP" ),            LNUMVAL( PULL_UP )                },
+  { LSTRKEY( "INT" ),               LNUMVAL( GPIO_INTR_POSEDGE )      },
+  { LSTRKEY( "OPENDRAIN" ),         LNUMVAL( 1 )                      },
+  //   new but for consistency
+  { LSTRKEY( "INPUT_OUTPUT" ),      LNUMVAL( GPIO_MODE_INPUT_OUTPUT ) },
+
 
   { LNILKEY, LNILVAL }
 };

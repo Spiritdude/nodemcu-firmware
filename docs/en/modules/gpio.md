@@ -14,7 +14,22 @@ The ESP32 chip features 40 physical GPIO pads. Some GPIO pads cannot be used or 
 - GPIO34-39 can only be set as input mode and do not have software pullup or pulldown functions.
 
 
-## gpio.config()
+## gpio.mode()
+Initialize single pin to GPIO mode, set the pin in/out direction, and optional internal weak pull-up.
+
+#### Syntax
+```lua
+gpio.mode(gpio,mode [, pullup])
+```
+#### Returns
+`nil`
+
+#### Example
+```
+gpio.mode(0,gpio.OUTPUT)
+```
+
+## gpio.config() (NodeMCU/ESP32 only, not compatible with others)
 Configure GPIO mode for one or more pins.
 
 #### Syntax

@@ -67,6 +67,50 @@ end
 #### See also
 [`file.open()`](#fileopen)
 
+## file.stat()
+Get attribtues of a file or directory in a table. Elements of the table are:
+
+- `size` file size in bytes
+- `name` file name
+- `time` table with time stamp information. Default is 1970-01-01 00:00:00 in case time stamps are not supported (on SPIFFS).
+  - `year`
+  - `mon`
+  - `day`
+  - `hour`
+  - `min`
+  - `sec`
+- `is_dir` flag `true` if item is a directory, otherwise `false`
+- `is_rdonly` flag `true` if item is read-only, otherwise `false`
+- `is_hidden` flag `true` if item is hidden, otherwise `false`
+- `is_sys` flag `true` if item is system, otherwise `false`
+- `is_arch` flag `true` if item is archive, otherwise `false`
+
+#### Syntax
+```
+file.stat(filename)
+```
+#### Parameters
+`filename` file name
+
+#### Returns
+table containing file attributes
+
+#### Example
+```
+s = file.stat("/SD0/myfile")
+print("name: " .. s.name)
+print("size: " .. s.size)
+
+t = s.time
+print(string.format("%02d:%02d:%02d", t.hour, t.min, t.sec))
+print(string.format("%04d-%02d-%02d", t.year, t.mon, t.day))
+
+if s.is_dir then print("is directory") else print("is file") end
+if s.is_rdonly then print("is read-only") else print("is writable") end
+if s.is_hidden then print("is hidden") else print("is not hidden") end
+if s.is_sys then print("is system") else print("is not system") end
+if s.is_arch then print("is archive") else print("is not archive") end
+```
 ## file.exists()
 
 Determines whether the specified file exists.
@@ -78,7 +122,7 @@ Determines whether the specified file exists.
 - `filename` file to check
 
 #### Returns
-true of the file exists (even if 0 bytes in size), and false if it does not exist
+`true` if the file exists (even if 0 bytes in size), and `false` if it does not exist
 
 #### Example
 

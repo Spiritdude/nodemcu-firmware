@@ -10,6 +10,12 @@
 static int file_fd = 0;
 static int rtc_cb_ref = LUA_NOREF;
 
+#define FILE_TIMEDEF_YEAR 1970
+#define FILE_TIMEDEF_MON 01
+#define FILE_TIMEDEF_DAY 01
+#define FILE_TIMEDEF_HOUR 00
+#define FILE_TIMEDEF_MIN 00
+#define FILE_TIMEDEF_SEC 00
 
 static void table2tm( lua_State *L, vfs_time *tm )
 {
@@ -200,6 +206,73 @@ static int file_exists( lua_State* L )
 
   if (stat) vfs_closeitem(stat);
 
+  return 1;
+}
+
+// Lua: stat(filename)
+static int file_stat( lua_State* L )
+{
+  size_t len;
+  const char *fname = luaL_checklstring( L, 1, &len );    
+  const char *basename = vfs_basename( fname );
+  luaL_argcheck(L, strlen(basename) <= CONFIG_FS_OBJ_NAME_LEN && strlen(fname) == len, 1, "filename invalid");
+
+  vfs_item *stat = vfs_stat((char *)fname);
+
+  if (stat) {
+    lua_createtable(L, 0, 7);
+
+    lua_pushinteger( L, stat->fns->size(stat) );
+    lua_setfield( L, -2, "size" );
+  
+    lua_pushstring( L, (char *)fname );
+    lua_setfield( L, -2, "name" );
+
+    // other metadata calls stat->fns->is_*(stat) core dump (todo)
+    lua_pushboolean( L, 0 ); //stat->fns->is_dir(stat) );
+    lua_setfield( L, -2, "is_dir" );
+  
+    lua_pushboolean( L, 0 ); //stat->fns->is_rdonly(stat) );
+    lua_setfield( L, -2, "is_rdonly" );
+  
+    lua_pushboolean( L, 0 ); //stat->fns->is_hidden(stat) );
+    lua_setfield( L, -2, "is_hidden" );
+  
+    lua_pushboolean( L, 0 ); //stat->fns->is_sys(stat) );
+    lua_setfield( L, -2, "is_sys" );
+  
+    lua_pushboolean( L, 0 ); //stat->fns->is_arch(stat) );
+    lua_setfield( L, -2, "is_arch" );
+  
+    // time stamp as sub-table
+    lua_createtable( L, 0, 6 );
+  
+    // todo: process st->mtime
+    lua_pushinteger( L, FILE_TIMEDEF_YEAR );
+    lua_setfield( L, -2, "year" );
+  
+    lua_pushinteger( L, FILE_TIMEDEF_MON );
+    lua_setfield( L, -2, "mon" );
+  
+    lua_pushinteger( L, FILE_TIMEDEF_DAY );
+    lua_setfield( L, -2, "day" );
+  
+    lua_pushinteger( L, FILE_TIMEDEF_HOUR );
+    lua_setfield( L, -2, "hour" );
+  
+    lua_pushinteger( L, FILE_TIMEDEF_MIN );
+    lua_setfield( L, -2, "min" );
+  
+    lua_pushinteger( L, FILE_TIMEDEF_SEC );
+    lua_setfield( L, -2, "sec" );
+  
+    lua_setfield( L, -2, "time" );
+
+    vfs_closeitem(stat);
+
+  } else {
+    lua_pushnil( L );
+  }
   return 1;
 }
 
@@ -408,6 +481,7 @@ static const LUA_REG_TYPE file_map[] = {
   { LSTRKEY( "flush" ),     LFUNCVAL( file_flush ) },
   { LSTRKEY( "rename" ),    LFUNCVAL( file_rename ) },
   { LSTRKEY( "exists" ),    LFUNCVAL( file_exists ) },  
+  { LSTRKEY( "stat" ),      LFUNCVAL( file_stat ) },
   { LSTRKEY( "fsinfo" ),    LFUNCVAL( file_fsinfo ) },
   { LSTRKEY( "on" ),        LFUNCVAL( file_on ) },
 #ifdef CONFIG_BUILD_FATFS
